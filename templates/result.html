@@ -117,11 +117,11 @@
         <p>The AI model has analyzed the Customer Churn Prediction.</p>
 
         {% if "CHURN" in prediction or "NO CHURN" in prediction %}
-        <div class="result-box positive">
+        <div class="result-box Churn">
             ⚠️ {{ prediction }}
         </div>
         {% else %}
-        <div class="result-box negative">
+        <div class="result-box no Churn">
             ✅ {{ prediction }}
         </div>
         {% endif %}

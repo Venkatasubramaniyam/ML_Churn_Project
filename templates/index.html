@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CKD Prediction</title>
+    <title>Customer Churn Prediction</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -96,6 +96,7 @@
             border-radius: 10px;
             cursor: pointer;
             transition: .3s;
+            width: 100%;
         }
 
         .predict-btn:hover {
@@ -110,6 +111,132 @@
             font-size: 13px;
         }
 
+        /* Chatbot */
+        .chat-button {
+            position: fixed;
+            right: 25px;
+            bottom: 25px;
+            width: 62px;
+            height: 62px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            font-size: 27px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, .3);
+            z-index: 1000;
+        }
+
+        .chat-window {
+            position: fixed;
+            right: 25px;
+            bottom: 100px;
+            width: 360px;
+            max-width: calc(100vw - 30px);
+            height: 500px;
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, .3);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 999;
+        }
+
+        .chat-window.open {
+            display: flex;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 17px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h3 {
+            font-size: 16px;
+        }
+
+        .chat-header span {
+            font-size: 12px;
+            opacity: .85;
+        }
+
+        .close-chat {
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: #f6f8fb;
+        }
+
+        .message {
+            max-width: 82%;
+            padding: 10px 13px;
+            margin-bottom: 10px;
+            border-radius: 13px;
+            font-size: 13px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .bot-message {
+            background: white;
+            color: #333;
+            border: 1px solid #e3e7ee;
+            border-top-left-radius: 4px;
+        }
+
+        .user-message {
+            background: #2a5298;
+            color: white;
+            margin-left: auto;
+            border-top-right-radius: 4px;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 8px;
+            padding: 12px;
+            border-top: 1px solid #e5e5e5;
+            background: white;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: 1px solid #d5d9e0;
+            border-radius: 20px;
+            padding: 10px 13px;
+            outline: none;
+            font-size: 13px;
+        }
+
+        .send-button {
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            background: #2a5298;
+            color: white;
+            cursor: pointer;
+        }
+
+        .typing {
+            font-style: italic;
+            color: #777;
+        }
+
         @media(max-width:650px) {
             form {
                 grid-template-columns: 1fr;
@@ -122,9 +249,23 @@
             .header h1 {
                 font-size: 26px;
             }
+
+            .container {
+                padding: 25px;
+            }
+
+            .chat-window {
+                right: 15px;
+                bottom: 90px;
+                height: 470px;
+            }
+
+            .chat-button {
+                right: 15px;
+                bottom: 15px;
+            }
         }
     </style>
-
 </head>
 
 <body>
@@ -174,9 +315,111 @@
         <div class="footer">
             AI Powered Customer Churn Prediction
         </div>
-
     </div>
 
-</body>
+    <!-- Floating chatbot -->
+    <button class="chat-button" id="chatButton" aria-label="Open AI Assistant">🤖</button>
 
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <div>
+                <h3>AI Churn Assistant</h3>
+                <span>Ask about customer churn</span>
+            </div>
+            <button class="close-chat" id="closeChat">&times;</button>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot-message">
+                Hi! I can help you understand customer churn and this prediction application.
+                What would you like to know?
+            </div>
+        </div>
+
+        <div class="chat-input-area">
+            <input
+                id="chatInput"
+                class="chat-input"
+                type="text"
+                placeholder="Ask a question..."
+                autocomplete="off"
+            >
+            <button id="sendButton" class="send-button" aria-label="Send">➤</button>
+        </div>
+    </div>
+
+    <script>
+        const chatButton = document.getElementById("chatButton");
+        const chatWindow = document.getElementById("chatWindow");
+        const closeChat = document.getElementById("closeChat");
+        const chatInput = document.getElementById("chatInput");
+        const sendButton = document.getElementById("sendButton");
+        const chatMessages = document.getElementById("chatMessages");
+
+        chatButton.addEventListener("click", () => {
+            chatWindow.classList.add("open");
+            chatInput.focus();
+        });
+
+        closeChat.addEventListener("click", () => {
+            chatWindow.classList.remove("open");
+        });
+
+        function addMessage(text, type) {
+            const div = document.createElement("div");
+            div.className = "message " + type + "-message";
+            div.textContent = text;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return div;
+        }
+
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+
+            if (!message) return;
+
+            addMessage(message, "user");
+            chatInput.value = "";
+            sendButton.disabled = true;
+
+            const typing = addMessage("AI is typing...", "bot");
+            typing.classList.add("typing");
+
+            try {
+                const response = await fetch("/chat", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                const data = await response.json();
+                typing.remove();
+
+                if (!response.ok) {
+                    addMessage(data.error || "Unable to get a response.", "bot");
+                } else {
+                    addMessage(data.response, "bot");
+                }
+            } catch (error) {
+                typing.remove();
+                addMessage("Unable to connect to the chatbot. Please try again.", "bot");
+            } finally {
+                sendButton.disabled = false;
+                chatInput.focus();
+            }
+        }
+
+        sendButton.addEventListener("click", sendMessage);
+
+        chatInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        });
+    </script>
+
+</body>
 </html>
