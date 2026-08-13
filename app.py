@@ -4,6 +4,13 @@ import pickle
 import numpy as np
 import pandas as pd
 from openai import OpenAI
+# from dotenv import load_dotenv
+
+# load_dotenv()
+
+# client = OpenAI(
+#     api_key=os.environ.get("OPENAI_API_KEY")
+# )
 
 app = Flask(__name__)
 
@@ -100,7 +107,7 @@ def chat():
     except Exception as exc:
         app.logger.exception("Chatbot error")
         return jsonify({
-            "error": "The chatbot is temporarily unavailable. Please try again."
+            "error": "The chatbot is temporarily unavailable. Please try again later."
         }), 500
 
 
